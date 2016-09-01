@@ -1,0 +1,12 @@
+D:\Visual Studio 2015\Projects\0784957_DataSyncProject\DataSyncProject\bin\Debug\DataSyncProject.exe.config
+D:\Visual Studio 2015\Projects\0784957_DataSyncProject\DataSyncProject\obj\Debug\DataSyncProject.csprojResolveAssemblyReference.cache
+D:\Visual Studio 2015\Projects\0784957_DataSyncProject\DataSyncProject\obj\Debug\DataSyncProject.Properties.Resources.resources
+D:\Visual Studio 2015\Projects\0784957_DataSyncProject\DataSyncProject\obj\Debug\DataSyncProject.csproj.GenerateResource.Cache
+D:\Visual Studio 2015\Projects\0784957_DataSyncProject\DataSyncProject\bin\Debug\DataSyncProject.exe
+D:\Visual Studio 2015\Projects\0784957_DataSyncProject\DataSyncProject\bin\Debug\DataSyncProject.pdb
+D:\Visual Studio 2015\Projects\0784957_DataSyncProject\DataSyncProject\obj\Debug\DataSyncProject.exe
+D:\Visual Studio 2015\Projects\0784957_DataSyncProject\DataSyncProject\obj\Debug\DataSyncProject.pdb
+D:\Visual Studio 2015\Projects\0784957_DataSyncProject\DataSyncProject\obj\Debug\ISynchronizeInvokeExtensions.resources
+D:\Visual Studio 2015\Projects\0784957\DataSync\DataSyncProject\bin\Debug\DataSyncProject.exe.config
+D:\Visual Studio 2015\Projects\0784957\DataSync\DataSyncProject\obj\Debug\DataSyncProject.exe
+D:\Visual Studio 2015\Projects\0784957\DataSync\DataSyncProject\obj\Debug\DataSyncProject.pdb
