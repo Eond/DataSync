@@ -105,7 +105,7 @@
             // 
             this.lstFiles.Location = new System.Drawing.Point(12, 38);
             this.lstFiles.Name = "lstFiles";
-            this.lstFiles.Size = new System.Drawing.Size(393, 385);
+            this.lstFiles.Size = new System.Drawing.Size(393, 337);
             this.lstFiles.TabIndex = 6;
             // 
             // lstWorkSpaces
@@ -216,6 +216,7 @@
             this.btnForcedHome.TabIndex = 13;
             this.btnForcedHome.Text = "Recupérer la sauvegarde";
             this.btnForcedHome.UseVisualStyleBackColor = true;
+            this.btnForcedHome.Click += new System.EventHandler(this.btnForcedHome_Click);
             // 
             // btnForcedBackUp
             // 
@@ -226,6 +227,7 @@
             this.btnForcedBackUp.TabIndex = 13;
             this.btnForcedBackUp.Text = "Effectuer la sauvegarde";
             this.btnForcedBackUp.UseVisualStyleBackColor = true;
+            this.btnForcedBackUp.Click += new System.EventHandler(this.btnForcedBackUp_Click);
             // 
             // groupBox1
             // 

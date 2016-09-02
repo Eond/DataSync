@@ -16,6 +16,7 @@ namespace DataSyncProject
     {
         private List<BUFile> WorkspacesData = new List<BUFile>();
         private int wsPos = -1;
+        private List<string>[] param = { };
         public List<string> filesToSync = new List<string>();
         const string FILENAME = "SyncFolder";
         public Main()
@@ -60,7 +61,7 @@ namespace DataSyncProject
         private void addWSLocation(string loc)
         {
             bool found = false;
-            foreach(BUFile file in WorkspacesData)
+            foreach (BUFile file in WorkspacesData)
             {
                 if (file.getLastFolder() == BUFile.GetPathArray(loc).Last())
                     found = true;
@@ -105,7 +106,7 @@ namespace DataSyncProject
 
             pos.Reverse();
 
-            foreach(int i in pos)
+            foreach (int i in pos)
             {
                 if (i == wsPos)
                     lstWorkSpaceSave.Nodes.Clear();
@@ -119,6 +120,8 @@ namespace DataSyncProject
         private void btnSync_Click(object sender, EventArgs e)
         {
             Thread sync = new Thread(Synchronize);
+            List<string>[] ret = { filesToSync, getBUFolders(false), makeWSPrefixes() };
+            param = ret;
             sync.Start();
             /*worker.WorkerReportsProgress = true;
             worker.DoWork += Synchronize;
@@ -133,62 +136,89 @@ namespace DataSyncProject
         {
             Enabled = true;
         }*/
-        private void Synchronize()
+
+        private void syncStart(int maxPrg)
         {
             this.InvokeEx(f => f.Enabled = false);
-            List<string> strBU = makeBULocations();
-            List<string> strWS = makeWSPrefixes();
-            int totalFiles = filesToSync.Count * strBU.Count;
-            this.InvokeEx(f => f.pgbSync.Maximum = totalFiles);
+            this.InvokeEx(f => f.pgbSync.Maximum = maxPrg);
             this.InvokeEx(f => f.pgbSync.Minimum = 0);
             this.InvokeEx(f => f.pgbSync.Step = 1);
             this.InvokeEx(f => f.pgbSync.Value = 0);
-            /*pgbSync.Maximum = totalFiles;
-            pgbSync.Minimum = 0;
-            pgbSync.Step = 1;
-            pgbSync.Value = 0;*/
+        }
 
-            filesToSync.ForEach(file =>
+        private void syncEnd()
+        {
+            this.InvokeEx(f => f.Enabled = true);
+            this.InvokeEx(f => f.UpdateFileList());
+        }
+
+        private void Synchronize()
+        {
+            List<string> src = param[0];
+            List<string> dest = param[1];
+            List<string> prefixes = param[2];
+            string filename = (prefixes[0].Contains(FILENAME) ? "" : (FILENAME + "\\"));
+            syncStart(src.Count * dest.Count);
+
+            try
             {
-                string localPath = "";
-                string prefix = "";
-                strWS.ForEach(str =>
-                {
-                    if (prefix == "" && file.Contains(str))
-                    {
-                        prefix = BUFile.GetPathArray(str).Last();
-                        localPath = file.Replace(str, "");
-                    }
-                });
-                string dest = FILENAME + "\\" + prefix + localPath;
-                strBU.ForEach(str =>
+                dest.ForEach(strD =>
                 {
                     string padding = "";
-                    if (str.Last() != '\\')
+                    if (strD.Last() != '\\')
                         padding = "\\";
-                    string strDest = str + padding + dest;
-                    if (File.Exists(strDest))
-                        File.Copy(file, strDest, true);
-                    else
+                    if (!Directory.Exists(strD + padding + filename))
+                        Directory.CreateDirectory(strD + padding + filename);
+                    src.ForEach(str =>
                     {
-                        string[] path = BUFile.GetPathArray(strDest);
-                        string newPath = "";
-                        for (int i=0; i < path.Length-1; i++)
+                        string localPath = "";
+                        int j;
+
+                        for (j = 0; j < prefixes.Count; j++)
                         {
-                            if (i != 0)
-                                newPath = newPath + "\\";
-                            newPath = newPath + path[i];
+                            if (str.Contains(prefixes[j]))
+                                break;
                         }
 
-                        Directory.CreateDirectory(newPath);
-                        File.Copy(file, strDest);
-                    }
-                    this.InvokeEx(f => f.pgbSync.PerformStep());
+                        if (j >= prefixes.Count)
+                            throw new IndexOutOfRangeException("Les fichiers et les dossiers ne concordent pas.");
+
+                        string prefix = BUFile.GetPathArray(prefixes[j]).Last();
+                        string file = BUFile.GetPathArray(str).Last();
+                        localPath = str.Replace(file, "").Replace(prefixes[j], "");
+
+                        string strDest = strD + padding + filename + prefix + localPath + file;
+                        if (File.Exists(strDest))
+                            File.Copy(str, strDest, true);
+                        else
+                        {
+                            string[] path = BUFile.GetPathArray(strDest);
+                            string newPath = "";
+                            for (int i = 0; i < path.Length - 1; i++)
+                            {
+                                if (i != 0)
+                                    newPath = newPath + "\\";
+                                newPath = newPath + path[i];
+                            }
+
+                            Directory.CreateDirectory(newPath);
+                            File.Copy(str, strDest);
+                        }
+                        this.InvokeEx(f => f.pgbSync.PerformStep());
+
+                        if (File.GetAttributes(str).HasFlag(FileAttributes.Archive))
+                            File.SetAttributes(str, (FileAttributes)(File.GetAttributes(str) - FileAttributes.Archive));
+                    });
                 });
-                //File.SetAttributes(file, (FileAttributes)(File.GetAttributes(file) - FileAttributes.Archive));
-            });
-            this.InvokeEx(f => f.UpdateFileList());
-            this.InvokeEx(f => f.Enabled = true);
+            }
+            catch (Exception e)
+            {
+                ShowError(e.Message, "Erreur dans la Synchronisation");
+            }
+            finally
+            {
+                syncEnd();
+            }
         }
 
         private List<string> makeWSPrefixes()
@@ -416,7 +446,7 @@ namespace DataSyncProject
         {
             lstFiles.Nodes.Clear();
             filesToSync.Clear();
-            foreach(BUFile data in WorkspacesData)
+            foreach (BUFile data in WorkspacesData)
             {
                 TreeNode node = data.getTree(true, this);
                 if (node == null)
@@ -462,12 +492,12 @@ namespace DataSyncProject
             ok = ok && lstBackupLoc.Items.Count > 0;
             ok = ok && lstFiles.Nodes.Count > 0;
 
-            btnSync.Enabled = ok;
+            btnSync.Enabled = ok && filesToSync.Count > 0;
             btnForcedBackUp.Enabled = ok;
             btnForcedHome.Enabled = ok;
             saveConfig.Enabled = ok;
         }
-     
+
         private void newConfig_Click(object sender, EventArgs e)
         {
             DialogResult res = MessageBox.Show(this, "Êtes-vous sûr de tout effacer?", "Réinitialisation du contenu", MessageBoxButtons.YesNo);
@@ -499,6 +529,122 @@ namespace DataSyncProject
         static public void ShowError(string message, string caption)
         {
             MessageBox.Show(message, caption, MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+
+        private void btnForcedBackUp_Click(object sender, EventArgs e)
+        {
+            List<string> lstSrcFiles = getWSFileList();
+            List<string> lstDestFolders = getBUFolders(false);
+            List<string>[] ret = { lstSrcFiles, lstDestFolders, makeWSPrefixes() };
+            param = ret;
+            Thread sync = new Thread(Synchronize);
+            sync.Start();
+        }
+
+        private List<string> getBUFolders(bool addFilename)
+        {
+            List<string> retrun = new List<string>();
+
+            foreach (string folder in lstBackupLoc.Items)
+            {
+                if (Directory.Exists(folder))
+                {
+                    string newValue = folder;
+                    if (addFilename)
+                    {
+                        if (folder.Last().Equals("\\"))
+                            newValue += "\\";
+                        newValue += FILENAME + "\\";
+                    }
+                    retrun.Add(newValue);
+                }
+            }
+
+            return retrun;
+        }
+
+        private List<string> getWSFolders()
+        {
+            List<string> retrun = new List<string>();
+
+            foreach (BUFile folder in WorkspacesData)
+            {
+                string fd = BUFile.GetNodePath(folder.getTree());
+
+                if (Directory.Exists(fd))
+                {
+                    retrun.Add(fd);
+                }
+            }
+
+            return retrun;
+        }
+
+        private List<string> getWSFileList()
+        {
+            List<string> retrun = new List<string>();
+            WorkspacesData.ForEach((BUFile folder) =>
+            {
+                List<string> test = makeFileList(BUFile.GetNodePath(folder.getTree()));
+
+                if (test != null)
+                    retrun.AddRange(test);
+            });
+
+            return retrun;
+        }
+
+        private List<string> getBUFileList()
+        {
+            List<string> retrun = new List<string>();
+            foreach (string folder in lstBackupLoc.Items)
+            {
+                string padding = "";
+                if (folder.Last() != '\\')
+                {
+                    padding = "\\";
+                }
+                List<string> test = makeFileList(folder+padding+FILENAME);
+
+                if (test != null)
+                    retrun.AddRange(test);
+            }
+
+            return retrun;
+        }
+
+        private List<string> makeFileList(string parent)
+        {
+            if (Directory.Exists(parent))
+            {
+                List<string> retrun = new List<string>();
+
+                foreach (string path in Directory.EnumerateDirectories(parent))
+                {
+                    List<string> test = makeFileList(path);
+                    if (test != null)
+                        retrun.AddRange(test);
+                }
+
+                foreach (string file in Directory.EnumerateFiles(parent))
+                {
+                    retrun.Add(file);
+                }
+
+                return retrun;
+            }
+
+            return null;
+        }
+
+        private void btnForcedHome_Click(object sender, EventArgs e)
+        {
+            List<string> lstSrcFiles = getBUFileList();
+            List<string> lstDestFolders = getWSFolders();
+            List<string>[] ret = { lstSrcFiles, lstDestFolders, getBUFolders(true) };
+            param = ret;
+            Thread sync = new Thread(Synchronize);
+            sync.Start();
         }
     }
 }
