@@ -10,21 +10,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-public static class ISynchronizeInvokeExtensions
-{
-    public static void InvokeEx<T>(this T @this, Action<T> action) where T : ISynchronizeInvoke
-    {
-        if (@this.InvokeRequired)
-        {
-            @this.Invoke(action, new object[] { @this });
-        }
-        else
-        {
-            action(@this);
-        }
-    }
-}
-
 namespace DataSyncProject
 {
     public partial class Main : Form
@@ -514,6 +499,20 @@ namespace DataSyncProject
         static public void ShowError(string message, string caption)
         {
             MessageBox.Show(message, caption, MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+    }
+}
+public static class ISynchronizeInvokeExtensions
+{
+    public static void InvokeEx<T>(this T @this, Action<T> action) where T : ISynchronizeInvoke
+    {
+        if (@this.InvokeRequired)
+        {
+            @this.Invoke(action, new object[] { @this });
+        }
+        else
+        {
+            action(@this);
         }
     }
 }

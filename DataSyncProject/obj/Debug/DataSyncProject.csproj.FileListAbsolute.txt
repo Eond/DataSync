@@ -10,3 +10,6 @@ D:\Visual Studio 2015\Projects\0784957_DataSyncProject\DataSyncProject\obj\Debug
 D:\Visual Studio 2015\Projects\0784957\DataSync\DataSyncProject\bin\Debug\DataSyncProject.exe.config
 D:\Visual Studio 2015\Projects\0784957\DataSync\DataSyncProject\obj\Debug\DataSyncProject.exe
 D:\Visual Studio 2015\Projects\0784957\DataSync\DataSyncProject\obj\Debug\DataSyncProject.pdb
+D:\GitHub\DataSync\DataSyncProject\bin\Debug\DataSyncProject.exe.config
+D:\GitHub\DataSync\DataSyncProject\obj\Debug\DataSyncProject.exe
+D:\GitHub\DataSync\DataSyncProject\obj\Debug\DataSyncProject.pdb
