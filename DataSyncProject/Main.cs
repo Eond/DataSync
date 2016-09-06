@@ -14,7 +14,7 @@ namespace DataSyncProject
 {
     public partial class Main : Form
     {
-        private List<BUFile> WorkspacesData = new List<BUFile>();
+        private List<oldBUFile> WorkspacesData = new List<oldBUFile>();
         private int wsPos = -1;
         private List<string>[] param = { };
         public List<string> filesToSync = new List<string>();
@@ -61,21 +61,21 @@ namespace DataSyncProject
         private void addWSLocation(string loc)
         {
             bool found = false;
-            foreach (BUFile file in WorkspacesData)
+            foreach (oldBUFile file in WorkspacesData)
             {
-                if (file.getLastFolder() == BUFile.GetPathArray(loc).Last())
+                if (file.getLastFolder() == oldBUFile.GetPathArray(loc).Last())
                     found = true;
             }
             if (!found)
             {
-                BUFile NewColl = new BUFile(loc);
+                oldBUFile NewColl = new oldBUFile(loc);
 
                 WorkspacesData.Add(NewColl);
                 addLocation(loc, lstWorkSpaces);
             }
             else
             {
-                ShowError("Un dossier avec le nom '" + BUFile.GetPathArray(loc).Last() + "' est déjà enregistré.", "Dossier existant");
+                ShowError("Un dossier avec le nom '" + oldBUFile.GetPathArray(loc).Last() + "' est déjà enregistré.", "Dossier existant");
             }
         }
 
@@ -183,8 +183,8 @@ namespace DataSyncProject
                         if (j >= prefixes.Count)
                             throw new IndexOutOfRangeException("Les fichiers et les dossiers ne concordent pas.");
 
-                        string prefix = BUFile.GetPathArray(prefixes[j]).Last();
-                        string file = BUFile.GetPathArray(str).Last();
+                        string prefix = oldBUFile.GetPathArray(prefixes[j]).Last();
+                        string file = oldBUFile.GetPathArray(str).Last();
                         localPath = str.Replace(file, "").Replace(prefixes[j], "");
 
                         string strDest = strD + padding + filename + prefix + localPath + file;
@@ -192,7 +192,7 @@ namespace DataSyncProject
                             File.Copy(str, strDest, true);
                         else
                         {
-                            string[] path = BUFile.GetPathArray(strDest);
+                            string[] path = oldBUFile.GetPathArray(strDest);
                             string newPath = "";
                             for (int i = 0; i < path.Length - 1; i++)
                             {
@@ -446,7 +446,7 @@ namespace DataSyncProject
         {
             lstFiles.Nodes.Clear();
             filesToSync.Clear();
-            foreach (BUFile data in WorkspacesData)
+            foreach (oldBUFile data in WorkspacesData)
             {
                 TreeNode node = data.getTree(true, this);
                 if (node == null)
@@ -454,7 +454,7 @@ namespace DataSyncProject
                 if (lstFiles.Nodes.Contains(node))
                 {
                     int i = lstFiles.Nodes.IndexOf(node);
-                    TreeNode fused = BUFile.fuseTrees(lstFiles.Nodes[i], node);
+                    TreeNode fused = oldBUFile.fuseTrees(lstFiles.Nodes[i], node);
                     if (fused == null)
                         break;
                     lstFiles.Nodes[i] = fused;
@@ -486,7 +486,7 @@ namespace DataSyncProject
         {
             bool ok = lstWorkSpaces.Items.Count > 0;
             bool blnData = false;
-            foreach (BUFile data in WorkspacesData)
+            foreach (oldBUFile data in WorkspacesData)
                 blnData = blnData || data.Exists;
             ok = ok && blnData;
             ok = ok && lstBackupLoc.Items.Count > 0;
@@ -567,9 +567,9 @@ namespace DataSyncProject
         {
             List<string> retrun = new List<string>();
 
-            foreach (BUFile folder in WorkspacesData)
+            foreach (oldBUFile folder in WorkspacesData)
             {
-                string fd = BUFile.GetNodePath(folder.getTree());
+                string fd = oldBUFile.GetNodePath(folder.getTree());
 
                 if (Directory.Exists(fd))
                 {
@@ -583,9 +583,9 @@ namespace DataSyncProject
         private List<string> getWSFileList()
         {
             List<string> retrun = new List<string>();
-            WorkspacesData.ForEach((BUFile folder) =>
+            WorkspacesData.ForEach((oldBUFile folder) =>
             {
-                List<string> test = makeFileList(BUFile.GetNodePath(folder.getTree()));
+                List<string> test = makeFileList(oldBUFile.GetNodePath(folder.getTree()));
 
                 if (test != null)
                     retrun.AddRange(test);

@@ -8,7 +8,7 @@ using System.Windows.Forms;
 
 namespace DataSyncProject
 {
-    class BUFile
+    class oldBUFile
     {
         static protected System.Drawing.Color errorColor = System.Drawing.Color.DarkRed;
         static protected System.Drawing.Color okColor = System.Drawing.Color.Green;
@@ -17,12 +17,12 @@ namespace DataSyncProject
         public bool Exists { get { return blnExists; } }
         private TreeNode tncFiles;
         private bool blnExists;
-        public BUFile(string home)
+        public oldBUFile(string home)
         {
             tncFiles = new TreeNode(home);
             Update();
         }
-        public BUFile(TreeNode home)
+        public oldBUFile(TreeNode home)
         {
             tncFiles = home;
             isValid();
@@ -228,6 +228,28 @@ namespace DataSyncProject
         public string getLastFolder()
         {
             return GetPathArray(GetNodePath()).Last();
+        }
+    }
+    /// <summary>
+    /// Assemble et valide les informations de sauvegarde d'un fichier sur le poste.
+    /// </summary>
+    class BUFile
+    {
+        /// <summary>
+        /// Constructeur initial. L'objet est créé seulement si l'emplacement est valide.
+        /// </summary>
+        /// <param name="file">Chemin complet pointant un fichier sur le poste local.</param>
+        public BUFile(string file)
+        {
+
+        }
+        /// <summary>
+        /// Constructeur par copie. On sait que l'objet a déjà exister, donc on va contourner certaines vérifications.
+        /// </summary>
+        /// <param name="file">Ficheir duquel nous allons récupérer les informations.</param>
+        public BUFile(BUFile file)
+        {
+
         }
     }
 }

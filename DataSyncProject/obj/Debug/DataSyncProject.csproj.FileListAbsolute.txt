@@ -19,3 +19,6 @@ D:\GitHub\DataSync\DataSyncProject\obj\Debug\DataSyncProject.Properties.Resource
 D:\GitHub\DataSync\DataSyncProject\obj\Debug\DataSyncProject.csproj.GenerateResource.Cache
 D:\GitHub\DataSync\DataSyncProject\bin\Debug\DataSyncProject.exe
 D:\GitHub\DataSync\DataSyncProject\bin\Debug\DataSyncProject.pdb
+D:\Visual Studio 2015\Projects\DataSync\DataSyncProject\bin\Debug\DataSyncProject.exe.config
+D:\Visual Studio 2015\Projects\DataSync\DataSyncProject\obj\Debug\DataSyncProject.exe
+D:\Visual Studio 2015\Projects\DataSync\DataSyncProject\obj\Debug\DataSyncProject.pdb
