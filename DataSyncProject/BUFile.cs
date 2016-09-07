@@ -235,21 +235,247 @@ namespace DataSyncProject
     /// </summary>
     class BUFile
     {
+        /// TODO: COLORS
         /// <summary>
-        /// Constructeur initial. L'objet est créé seulement si l'emplacement est valide.
+        /// Contient le chemin complet du fichier.
+        /// <para>Accès externe par <see cref="FullPath"/>.</para>
+        /// </summary>
+        private PathObj _fullPath;
+        /// <summary>
+        /// Contient le préfixe de l'emplacement de travail sur le poste actuel.
+        /// <para>Accès externe par <see cref="Prefix"/>.</para>
+        /// </summary>
+        private PathObj _prefix;
+        /// <summary>
+        /// Liste des emplacements de sauvegarde.
+        /// <para>Accès externe par <see cref="Dest"/>.</para>
+        /// </summary>
+        private List<PathObj> _dest = new List<PathObj>();
+        public List<PathObj> Dest
+        {
+            get
+            {
+                return _dest;BUColors.Normal;
+            }
+        }
+        /// <summary>
+        /// Retourne le chemin complet du fichier.
+        /// </summary>
+        public string FullPath
+        {
+            get { return _fullPath; }
+        }
+        /// <summary>
+        /// Permet la lecture et l'écriture du préfixe.
+        /// </summary>
+        public string Prefix
+        {
+            get
+            {
+                return _prefix;
+            }
+            set
+            {
+                PathObj nPath = value;
+                if (!nPath.ForceAbsPath())
+                    throw new ArgumentException("La nouvelle valeur pour le préfixe est invalide dans le contexte actuel.");
+                if (nPath.Exists && FullPath.Contains(nPath) && nPath.Attributes.HasFlag(FileAttributes.Directory))
+                    _prefix = nPath;
+                else
+                    throw new ArgumentException("Mauvaise valeur pour le nouveau préfixe.");
+            }
+        }
+        /// <summary>
+        /// Retourne les derniers attributs connus du fichier.
+        /// </summary>
+        public FileAttributes Attributes
+        {
+            get
+            {
+                return _fullPath.Attributes;
+            }
+        }
+        public ErrorCode LastErrorCodes { get; private set; }
+        /// <summary>
+        /// Constructeur initial. L'objet est créé seulement si la référence est valide.
         /// </summary>
         /// <param name="file">Chemin complet pointant un fichier sur le poste local.</param>
         public BUFile(string file)
         {
-
+            _fullPath = file;
+            if (!_fullPath.ForceAbsPath())
+                throw new ArgumentException("Fichier invalide.");
+            IsValid(true);
+            Prefix = _fullPath.GetPathRoot();
         }
         /// <summary>
         /// Constructeur par copie. On sait que l'objet a déjà exister, donc on va contourner certaines vérifications.
         /// </summary>
-        /// <param name="file">Ficheir duquel nous allons récupérer les informations.</param>
+        /// <param name="file">Fichier duquel nous allons récupérer les informations.</param>
         public BUFile(BUFile file)
         {
+            _fullPath = file.FullPath;
+            _prefix = file.Prefix;
+            _dest = file.Dest;
+            IsValid();
+        }
+        /// <summary>
+        /// Surcharge de <see cref="IsValid()"/>. Valide la référence et initie les information lorsque possible.
+        /// <para><seealso cref="LastErrorCodes"/></para>
+        /// </summary>
+        /// <param name="init">Indique si nous sommes en initiation. Retourne toujours vrai dans ce cas ou sort en erreur.</param>
+        /// <returns>Vrai si tout est valide pour la référence et qu'il y a au moins une destination de sauvegarde valide. Si en initiation, toujours Vrai.</returns>
+        private bool IsValid(bool init)
+        {
+            bool retrun = true;
+            LastErrorCodes = ErrorCode.None;
 
+            if (string.IsNullOrWhiteSpace(_fullPath))
+                throw new System.ArgumentNullException("Référence invalide.");
+
+            if (init) // On est en initiation de l'objet.
+            {
+                if (Attributes.HasFlag(FileAttributes.Directory))
+                    throw new DirectoryFileException();
+            }
+            else // L'objet est déjà initié.
+            {
+                if (!_fullPath.Exists)
+                {
+                    LastErrorCodes &= ErrorCode.FileMissing;
+                    retrun = false;
+                }
+                else
+                {
+                    if (Attributes.HasFlag(FileAttributes.Directory))
+                    {
+                        LastErrorCodes &= ErrorCode.IsFolder;
+                        retrun = false;
+                    }
+                    if (Dest.Count <= 0)
+                    {
+                        LastErrorCodes &= ErrorCode.NoDest;
+                        retrun = false;
+                    }
+                    else
+                    {
+                        bool found = false;
+                        Dest.ForEach(p => {
+                            found = found || p.CanCreate;
+                        });
+                        if (!found)
+                        {
+                            LastErrorCodes &= ErrorCode.NoValidDest;
+                            retrun = false;
+                        }
+                    }
+                }
+                if (!_prefix.Exists)
+                {
+                    LastErrorCodes &= ErrorCode.PrefixInvalid;
+                    retrun = false;
+                }
+            }
+
+            return retrun;
+        }
+        /// <summary>
+        /// Valide la référence.
+        /// </summary>
+        /// <returns>Vrai si tout est valide et qu'au moins une destination de sauvegarde est valide.</returns>
+        public bool IsValid()
+        {
+            return IsValid(false);
+        }
+        public void AddDest(PathObj dest)
+        {
+            if (!_prefix.Exists)
+                throw new Exception("Préfixe de station invalide.");
+            if (dest.Exists && dest.Attributes.HasFlag(FileAttributes.Directory))
+            {
+                if (dest.GetLastFolder() != _prefix.GetLastFolder())
+                    dest.Append(_prefix.GetLastFolder());
+            }
+            else
+                throw new System.ArgumentException("La destination de sauvegarde n'est pas un dossier valide.");
+        }
+        /// <summary>
+        /// Ajoute un tableau de <see cref="PathObj"/> aux destinations.
+        /// </summary>
+        /// <param name="dests">Tableau de destinations.</param>
+        public void AddDestRange(PathObj[] dests)
+        {
+            foreach (PathObj dest in dests)
+            {
+                AddDest(dest);
+            }
+        }
+        /// <summary>
+        /// Ajoute une liste de <see cref="PathObj"/> aux destinations.
+        /// </summary>
+        /// <param name="dests">Liste de destinations.</param>
+        public void AddDestRange(List<PathObj> dests)
+        {
+            dests.ForEach(dest => AddDest(dest));
+        }
+        /// <summary>
+        /// Liste des codes d'erreur de BUFile
+        /// </summary>
+        [Flags]
+        public enum ErrorCode : short
+        {
+            /// <summary>
+            /// Pas d'erreur
+            /// </summary>
+            None = 0,
+            /// <summary>
+            /// La référence au fichier est invalide ou le dossier est manquant.
+            /// </summary>
+            FileMissing,
+            /// <summary>
+            /// La référence est un dossier. Doit être un fichier.
+            /// </summary>
+            IsFolder,
+            /// <summary>
+            /// Pas de dossier de sauvegarde.
+            /// </summary>
+            NoDest,
+            /// <summary>
+            /// Pas de dossier de sauvegarde valide.
+            /// </summary>
+            NoValidDest,
+            /// <summary>
+            /// Le préfixe n'est pas valide dans le contexte actuel.
+            /// </summary>
+            PrefixInvalid
+        }
+        /// <summary>
+        /// Exception de référence invalide. On a reçu un dossier alors qu'on voulait un fichier.
+        /// </summary>
+        class DirectoryFileException : Exception
+        {
+            /// <summary>
+            /// Message d'erreur.
+            /// </summary>
+            public override string Message { get; }
+            /// <summary>
+            /// Initialisation avec un message personalisé.
+            /// </summary>
+            /// <param name="msg">Message à passer au système.</param>
+            public DirectoryFileException(string msg)
+            {
+                if (string.IsNullOrWhiteSpace(msg))
+                    Message = "La référence doit être un fichier.";
+                else
+                    Message = msg;
+            }
+            /// <summary>
+            /// Initialisation de base. Le messag eest généré automatiquement.
+            /// </summary>
+            public DirectoryFileException()
+            {
+                Message = "La référence doit être un fichier.";
+            }
         }
     }
 }
