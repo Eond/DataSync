@@ -255,7 +255,7 @@ namespace DataSyncProject
         {
             get
             {
-                return _dest;BUColors.Normal;
+                return _dest;//BUColors.Normal;
             }
         }
         /// <summary>
@@ -457,24 +457,21 @@ namespace DataSyncProject
             /// <summary>
             /// Message d'erreur.
             /// </summary>
-            public override string Message { get; }
+            //ublic override string Message { get; }
             /// <summary>
             /// Initialisation avec un message personalisé.
             /// </summary>
             /// <param name="msg">Message à passer au système.</param>
-            public DirectoryFileException(string msg)
+            public DirectoryFileException(string msg) : base(msg)
             {
                 if (string.IsNullOrWhiteSpace(msg))
-                    Message = "La référence doit être un fichier.";
-                else
-                    Message = msg;
+                    msg = "La référence doit être un fichier.";
             }
             /// <summary>
             /// Initialisation de base. Le messag eest généré automatiquement.
             /// </summary>
-            public DirectoryFileException()
+            public DirectoryFileException() : base("La référence doit être un fichier.")
             {
-                Message = "La référence doit être un fichier.";
             }
         }
     }

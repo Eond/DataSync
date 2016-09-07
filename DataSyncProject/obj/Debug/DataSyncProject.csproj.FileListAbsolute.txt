@@ -22,3 +22,18 @@ D:\GitHub\DataSync\DataSyncProject\bin\Debug\DataSyncProject.pdb
 D:\Visual Studio 2015\Projects\DataSync\DataSyncProject\bin\Debug\DataSyncProject.exe.config
 D:\Visual Studio 2015\Projects\DataSync\DataSyncProject\obj\Debug\DataSyncProject.exe
 D:\Visual Studio 2015\Projects\DataSync\DataSyncProject\obj\Debug\DataSyncProject.pdb
+C:\Users\jmbea\Documents\Programming\Projects\Git\DataSync\DataSyncProject\obj\Debug\DataSyncProject.csprojResolveAssemblyReference.cache
+C:\Users\jmbea\Documents\Programming\Projects\Git\DataSync\DataSyncProject\obj\Debug\DataSyncProject.Main.resources
+C:\Users\jmbea\Documents\Programming\Projects\Git\DataSync\DataSyncProject\obj\Debug\DataSyncProject.Properties.Resources.resources
+C:\Users\jmbea\Documents\Programming\Projects\Git\DataSync\DataSyncProject\obj\Debug\DataSyncProject.csproj.GenerateResource.Cache
+C:\Users\jmbea\Documents\Programming\Projects\Git\DataSync\DataSyncProject\obj\Debug\DataSyncProject.exe
+C:\Users\jmbea\Documents\Programming\Projects\Git\DataSync\DataSyncProject\obj\Debug\DataSyncProject.pdb
+C:\Users\jmbea\Documents\Programming\Projects\Git\DataSync\DataSyncProject\bin\Debug\DataSyncProject.exe.config
+C:\Users\jmbea\Documents\Programming\Projects\Git\DataSync\DataSyncProject\bin\Debug\DataSyncProject.exe
+C:\Users\jmbea\Documents\Programming\Projects\Git\DataSync\DataSyncProject\bin\Debug\DataSyncProject.pdb
+C:\Users\jmbea\Documents\Programming\Projects\Git\DataSync\DataSyncProject\bin\Debug\mscorlib.dll
+C:\Users\jmbea\Documents\Programming\Projects\Git\DataSync\DataSyncProject\bin\Debug\normidna.nlp
+C:\Users\jmbea\Documents\Programming\Projects\Git\DataSync\DataSyncProject\bin\Debug\normnfc.nlp
+C:\Users\jmbea\Documents\Programming\Projects\Git\DataSync\DataSyncProject\bin\Debug\normnfd.nlp
+C:\Users\jmbea\Documents\Programming\Projects\Git\DataSync\DataSyncProject\bin\Debug\normnfkc.nlp
+C:\Users\jmbea\Documents\Programming\Projects\Git\DataSync\DataSyncProject\bin\Debug\normnfkd.nlp

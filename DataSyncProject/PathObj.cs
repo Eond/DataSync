@@ -18,6 +18,7 @@ namespace DataSyncProject
         /// <para>Accès externe par <see cref="Path"/>.</para>
         /// </summary>
         private string _path;
+
         /// <summary>
         /// Chemin d'accès.
         /// </summary>
@@ -30,6 +31,7 @@ namespace DataSyncProject
                 return _path;
             }
         }
+
         /// <summary>
         /// Initialise et valide l'objet.
         /// </summary>
@@ -45,6 +47,7 @@ namespace DataSyncProject
                 throw new System.ArgumentException("La chaîne contient des caractères interdits dans les chemins d'accès.");
             _path = file;
         }
+
         /// <summary>
         /// Retourne les informations relatives au répertoire de <see cref="Path"/>.
         /// </summary>
@@ -53,6 +56,7 @@ namespace DataSyncProject
         {
             return IOPath.GetDirectoryName(Path);
         }
+
         /// <summary>
         /// Retourne l'extension de <see cref="Path"/>.
         /// </summary>
@@ -61,6 +65,7 @@ namespace DataSyncProject
         {
             return IOPath.GetExtension(Path);
         }
+
         /// <summary>
         /// Retourne le nom et l'extension de fichier de <see cref="Path"/>.
         /// </summary>
@@ -69,6 +74,7 @@ namespace DataSyncProject
         {
             return IOPath.GetFileName(Path);
         }
+
         /// <summary>
         /// Retourne le nom de fichier de <see cref="Path"/> sans l'extension.
         /// </summary>
@@ -77,6 +83,7 @@ namespace DataSyncProject
         {
             return IOPath.GetFileNameWithoutExtension(Path);
         }
+
         /// <summary>
         /// Retourne le chemin d'accès absolu de <see cref="Path"/>.
         /// </summary>
@@ -85,6 +92,7 @@ namespace DataSyncProject
         {
             return IOPath.GetFullPath(_path);
         }
+
         /// <summary>
         /// Obtient les informations relatives au répertoire racine de <see cref="Path"/>.
         /// </summary>
@@ -95,6 +103,7 @@ namespace DataSyncProject
                 return IOPath.GetPathRoot(Path);
             return "";
         }
+
         /// <summary>
         /// Détermine si <see cref="Path"/> inclut une extension de nom de fichier.
         /// </summary>
@@ -103,6 +112,7 @@ namespace DataSyncProject
         {
             return IOPath.HasExtension(Path);
         }
+
         /// <summary>
         /// Obtient une value indiquant si <see cref="Path"/> contient une racine.
         /// </summary>
@@ -111,6 +121,7 @@ namespace DataSyncProject
         {
             return IOPath.IsPathRooted(Path);
         }
+
         /// <summary>
         /// Conversion manuelle en chaîne de caractères.
         /// </summary>
@@ -119,6 +130,7 @@ namespace DataSyncProject
         {
             return Path;
         }
+
         /// <summary>
         /// Retourne la liste de l'arborescence de dossier de <see cref="Path"/>.
         /// </summary>
@@ -127,6 +139,7 @@ namespace DataSyncProject
         {
             return Path.Split(IOPath.DirectorySeparatorChar);
         }
+
         /// <summary>
         /// Conversion automatique en chaîne de caractères.
         /// </summary>
@@ -135,6 +148,7 @@ namespace DataSyncProject
         {
             return path.Path;
         }
+
         /// <summary>
         /// Conversion automatique d'une chaîne de caractère en PathObj.
         /// </summary>
@@ -143,14 +157,17 @@ namespace DataSyncProject
         {
             return new PathObj(str);
         }
+
         /// <summary>
         /// Indique si on peut créer l'arborescence, en théorie.
         /// </summary>
         public bool CanCreate { get { return File.Exists(GetPathRoot()); } }
+
         /// <summary>
         /// Indique si le chemin d'accès existe dans l'environement actuel.
         /// </summary>
         public bool Exists { get { return File.Exists(_path); } }
+
         /// <summary>
         /// Renvoie les attributs du chemin d'accès.
         /// </summary>
@@ -161,6 +178,7 @@ namespace DataSyncProject
                 return File.GetAttributes(Path);
             }
         }
+
         /// <summary>
         /// Ré-écrit le chemin d'accès enregistré pour son chemin absolu.
         /// </summary>
@@ -175,6 +193,7 @@ namespace DataSyncProject
 
             return false;
         }
+
         /// <summary>
         /// Retire le nom de fichier du chemin d'accès, s'il y en avait un.
         /// </summary>
@@ -213,6 +232,7 @@ namespace DataSyncProject
 
             return "";
         }
+
         /// <summary>
         /// Retourne le dernier dossier du chemin d'accès.
         /// </summary>
@@ -225,6 +245,7 @@ namespace DataSyncProject
             string[] list = folders.GetPathList();
             return list[list.Count() - 1];
         }
+
         /// <summary>
         /// Ajoute un niveau à l'arborescence actuelle. Si le chemin d'accès pointe un fichier, le dossier est ajouté en avant du fichier.
         /// </summary>
@@ -244,6 +265,7 @@ namespace DataSyncProject
                 file = Separator + GetFileName();
             _path = aPath + Separator + level + file;
         }
+
         /// <summary>
         /// Raccourcis pour avoir le caractère de séparation de dossier.
         /// </summary>
