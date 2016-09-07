@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using KnownColor = System.Drawing.KnownColor;
 
 namespace DataSyncProject
 {
@@ -238,32 +239,34 @@ namespace DataSyncProject
         /// <summary>
         /// Liste de couleurs pour l'affichage.
         /// </summary>
-        class Color
+        public class Color
         {
             /// <summary>
             /// Texte normal.
             /// </summary>
-            const System.Drawing.KnownColor Normal = System.Drawing.KnownColor.Black;
+            public const KnownColor Normal = KnownColor.Black;
             /// <summary>
             /// Élément qui sera ignoré.
             /// </summary>
-            const System.Drawing.KnownColor Ignore = System.Drawing.KnownColor.DarkGray;
+            public const KnownColor Ignore = KnownColor.DarkGray;
             /// <summary>
             /// Élément en erreur ou en besoin d'action.
             /// </summary>
-            const System.Drawing.KnownColor Error = System.Drawing.KnownColor.DarkRed;
+            public const KnownColor Error = KnownColor.DarkRed;
             /// <summary>
             /// Élément requierant une attention pariculière
             /// </summary>
-            const System.Drawing.KnownColor Warn = System.Drawing.KnownColor.YellowGreen;
+            public const KnownColor Warn = KnownColor.YellowGreen;
             /// <summary>
             /// Élément sans problème.
             /// </summary>
-            const System.Drawing.KnownColor Ok = System.Drawing.KnownColor.DarkGreen;
+            public const KnownColor Ok = KnownColor.DarkGreen;
             /// <summary>
             /// Il est impossible de créer un objet de classe <see cref="Color"/>. 
             /// </summary>
-            private Color() { }
+            private Color()
+            {
+            }
         }
         /// <summary>
         /// Contient le chemin complet du fichier.
@@ -293,6 +296,36 @@ namespace DataSyncProject
         /// Liste des dates de dernières modifications des fichiers sauvegardés.
         /// </summary>
         private List<DateTime> _destLastChanges = new List<DateTime>();
+        /// <summary>
+        /// Couleur du texte dans l'interface.
+        /// <para>Accès externe par <see cref="TextColor"/>.</para>
+        /// </summary>
+        private KnownColor _textColor = Color.Normal;
+        /// <summary>
+        /// Couleur du fond dans l'interface.
+        /// <para>Accès externe par <see cref="BackColor"/>.</para>
+        /// </summary>
+        private KnownColor _backColor = Color.Normal;
+        /// <summary>
+        /// Retourne la valeur de la couleur voulu pour le texte.
+        /// </summary>
+        public KnownColor TextColor
+        {
+            get
+            {
+                return _textColor;
+            }
+        }
+        /// <summary>
+        /// Retourne la valeur de la couleur voulu pour le fond.
+        /// </summary>
+        public KnownColor BackColor
+        {
+            get
+            {
+                return _backColor;
+            }
+        }
         /// <summary>
         /// Retourne la liste des destinations de sauvegarde.
         /// </summary>
@@ -326,13 +359,22 @@ namespace DataSyncProject
                     throw new ArgumentException("La nouvelle valeur pour le préfixe est invalide dans le contexte actuel.");
                 if (nPath.Exists && FullPath.Contains(nPath) && nPath.Attributes.HasFlag(FileAttributes.Directory))
                 {
+                    PathObj _old = _prefix;
                     _prefix = nPath;
-
+                    _local = _fullPath - _prefix;
+                    if (_local == "" || _local == _fullPath)
+                    {
+                        _prefix = _old;
+                        throw new ArgumentException("La valeur fournie ne fonctionne pas.");
+                    }
                 }
                 else
                     throw new ArgumentException("Mauvaise valeur pour le nouveau préfixe.");
             }
         }
+        /// <summary>
+        /// Permet la lecture du chemin suivant le <see cref="Prefix"/>.
+        /// </summary>
         public string Local
         {
             get
@@ -407,6 +449,9 @@ namespace DataSyncProject
                         LastErrorCodes &= ErrorCode.IsFolder;
                         retrun = false;
                     }
+
+                    _lastChanges = File.GetLastWriteTime(_fullPath);
+
                     if (Dest.Count <= 0)
                     {
                         LastErrorCodes &= ErrorCode.NoDest;
@@ -416,7 +461,13 @@ namespace DataSyncProject
                     {
                         bool found = false;
                         Dest.ForEach(p => {
-                            found = found || p.CanCreate;
+                            if (p.Exists)
+                            {
+                                _destLastChanges[Dest.IndexOf(p)] = File.GetLastWriteTime(p);
+                                found = true;
+                            }
+                            else if (p.CanCreate)
+                                found = true;
                         });
                         if (!found)
                         {
@@ -424,6 +475,17 @@ namespace DataSyncProject
                             retrun = false;
                         }
                     }
+
+                    if (Attributes.HasFlag(FileAttributes.Archive))
+                        _textColor = Color.Error;
+
+                    _destLastChanges.ForEach(d =>
+                    {
+                        if (d > _lastChanges)
+                        {
+                            _backColor = Color.Warn;
+                        }
+                    });
                 }
                 if (!_prefix.Exists)
                 {

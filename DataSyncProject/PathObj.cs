@@ -33,7 +33,7 @@ namespace DataSyncProject
         }
 
         /// <summary>
-        /// Initialise et valide l'objet.
+        /// Initialise et valide l'objet à partir d'une chaîne de caractères.
         /// </summary>
         /// <param name="file">Chemin d'accès. Doit contenir au moins un niveau pour être considéré un chemin d'accès système.</param>
         public PathObj(string file)
@@ -47,13 +47,20 @@ namespace DataSyncProject
                 throw new System.ArgumentException("La chaîne contient des caractères interdits dans les chemins d'accès.");
             _path = file;
         }
-
+        /// <summary>
+        /// Initialise et valide l'objet à partir une liste de dossier ordonnés.
+        /// </summary>
+        /// <param name="arr">Liste ou tableau avec des nom de dossiers ordonnés.</param>
         public PathObj(IEnumerable<string> arr)
         {
-            /*if (arr.All(<s, b> =>
+            if (arr.All(s =>
             {
-             TODO: Verifier charactères invalides.
-            })*/
+                bool found = false;
+                foreach (char c in IOPath.GetInvalidPathChars())
+                    found = found || s.Contains(c);
+                return found;
+            }))
+                throw new ArgumentException("Des caractères interdits furent trouvés dans le paramètre.");
             if (arr.Count() == 1)
                 _path = arr.First() + Separator;
             else
