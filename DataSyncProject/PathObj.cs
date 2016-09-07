@@ -48,6 +48,26 @@ namespace DataSyncProject
             _path = file;
         }
 
+        public PathObj(IEnumerable<string> arr)
+        {
+            /*if (arr.All(<s, b> =>
+            {
+             TODO: Verifier charactères invalides.
+            })*/
+            if (arr.Count() == 1)
+                _path = arr.First() + Separator;
+            else
+            {
+                arr.ToList().ForEach(s =>
+                {
+                    if (s == arr.Last())
+                        _path += s;
+                    else
+                        _path += s + Separator;
+                });
+            }
+        }
+
         /// <summary>
         /// Retourne les informations relatives au répertoire de <see cref="Path"/>.
         /// </summary>
@@ -275,6 +295,36 @@ namespace DataSyncProject
             {
                 return IOPath.DirectorySeparatorChar;
             }
+        }
+        /// <summary>
+        /// Retire une portion de chemin d'accès.
+        /// </summary>
+        /// <param name="aPath">Chemin d'accès principal. Doit être plus gros.</param>
+        /// <param name="bPath">Chemin d'accès à retirer. Doit être inclu dans aPath.</param>
+        /// <returns></returns>
+        public static PathObj operator-(PathObj aPath, PathObj bPath)
+        {
+            string strA = aPath.ToString();
+            string strB = bPath.ToString();
+            List<string> arrA = new List<string>(aPath.GetPathList());
+            List<string> arrB = new List<string>(bPath.GetPathList());
+
+            if (strA.Contains(strB) && arrA.Contains(arrB[0]))
+            {
+                int b = 0;
+                int a = 0;
+                while (a < arrA.Count() && arrA[a] != arrB[b])
+                    a++;
+                while (b < arrB.Count())
+                {
+                    if (arrA[a] != arrB[b] || a >= arrA.Count())
+                        break;
+                    arrA.RemoveAt(a);
+                    b++;
+                }
+            }
+
+            return aPath;
         }
     }
 }

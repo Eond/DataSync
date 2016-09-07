@@ -235,7 +235,36 @@ namespace DataSyncProject
     /// </summary>
     class BUFile
     {
-        /// TODO: COLORS
+        /// <summary>
+        /// Liste de couleurs pour l'affichage.
+        /// </summary>
+        class Color
+        {
+            /// <summary>
+            /// Texte normal.
+            /// </summary>
+            const System.Drawing.KnownColor Normal = System.Drawing.KnownColor.Black;
+            /// <summary>
+            /// Élément qui sera ignoré.
+            /// </summary>
+            const System.Drawing.KnownColor Ignore = System.Drawing.KnownColor.DarkGray;
+            /// <summary>
+            /// Élément en erreur ou en besoin d'action.
+            /// </summary>
+            const System.Drawing.KnownColor Error = System.Drawing.KnownColor.DarkRed;
+            /// <summary>
+            /// Élément requierant une attention pariculière
+            /// </summary>
+            const System.Drawing.KnownColor Warn = System.Drawing.KnownColor.YellowGreen;
+            /// <summary>
+            /// Élément sans problème.
+            /// </summary>
+            const System.Drawing.KnownColor Ok = System.Drawing.KnownColor.DarkGreen;
+            /// <summary>
+            /// Il est impossible de créer un objet de classe <see cref="Color"/>. 
+            /// </summary>
+            private Color() { }
+        }
         /// <summary>
         /// Contient le chemin complet du fichier.
         /// <para>Accès externe par <see cref="FullPath"/>.</para>
@@ -247,15 +276,31 @@ namespace DataSyncProject
         /// </summary>
         private PathObj _prefix;
         /// <summary>
+        /// Contient le chemin après le préfix pour atteindre le fichier.
+        /// <para>Acces externe par <see cref="Local"/>.</para>
+        /// </summary>
+        private PathObj _local;
+        /// <summary>
         /// Liste des emplacements de sauvegarde.
         /// <para>Accès externe par <see cref="Dest"/>.</para>
         /// </summary>
         private List<PathObj> _dest = new List<PathObj>();
+        /// <summary>
+        /// Date et heure de dernière modification.
+        /// </summary>
+        private DateTime _lastChanges;
+        /// <summary>
+        /// Liste des dates de dernières modifications des fichiers sauvegardés.
+        /// </summary>
+        private List<DateTime> _destLastChanges = new List<DateTime>();
+        /// <summary>
+        /// Retourne la liste des destinations de sauvegarde.
+        /// </summary>
         public List<PathObj> Dest
         {
             get
             {
-                return _dest;//BUColors.Normal;
+                return _dest;
             }
         }
         /// <summary>
@@ -280,9 +325,19 @@ namespace DataSyncProject
                 if (!nPath.ForceAbsPath())
                     throw new ArgumentException("La nouvelle valeur pour le préfixe est invalide dans le contexte actuel.");
                 if (nPath.Exists && FullPath.Contains(nPath) && nPath.Attributes.HasFlag(FileAttributes.Directory))
+                {
                     _prefix = nPath;
+
+                }
                 else
                     throw new ArgumentException("Mauvaise valeur pour le nouveau préfixe.");
+            }
+        }
+        public string Local
+        {
+            get
+            {
+                return _local;
             }
         }
         /// <summary>
@@ -395,6 +450,7 @@ namespace DataSyncProject
             {
                 if (dest.GetLastFolder() != _prefix.GetLastFolder())
                     dest.Append(_prefix.GetLastFolder());
+                
             }
             else
                 throw new System.ArgumentException("La destination de sauvegarde n'est pas un dossier valide.");
