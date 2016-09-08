@@ -73,7 +73,7 @@ namespace DataSyncProject
         {
             List<TreeNode> retrun = new List<TreeNode>();
             bool found = false;
-            
+
             foreach (string dir in Directory.EnumerateDirectories(strPath))
             {
                 TreeNode tnNew = new TreeNode(GetPathArray(dir).Last());
@@ -460,7 +460,8 @@ namespace DataSyncProject
                     else
                     {
                         bool found = false;
-                        Dest.ForEach(p => {
+                        Dest.ForEach(p =>
+                        {
                             if (p.Exists)
                             {
                                 _destLastChanges[Dest.IndexOf(p)] = File.GetLastWriteTime(p);
@@ -476,7 +477,7 @@ namespace DataSyncProject
                         }
                     }
 
-                    if (Attributes.HasFlag(FileAttributes.Archive))
+                    if (Archive())
                         _textColor = Color.Error;
 
                     _destLastChanges.ForEach(d =>
@@ -512,7 +513,7 @@ namespace DataSyncProject
             {
                 if (dest.GetLastFolder() != _prefix.GetLastFolder())
                     dest.Append(_prefix.GetLastFolder());
-                
+
             }
             else
                 throw new System.ArgumentException("La destination de sauvegarde n'est pas un dossier valide.");
@@ -537,9 +538,121 @@ namespace DataSyncProject
             dests.ForEach(dest => AddDest(dest));
         }
         /// <summary>
+        /// Indique si le fichier est marqué pour l'archivage.
+        /// </summary>
+        /// <returns></returns>
+        public bool Archive()
+        {
+            return Attributes.HasFlag(FileAttributes.Archive);
+        }
+        /// <summary>
+        /// Effectue la sauvegarde seulement si le fichier est marqué pour l'archivage.
+        /// </summary>
+        /// <returns>Vrai si la synchronisation fut faite.</returns>
+        public bool Sync()
+        {
+            bool retrun = true;
+
+            if (IsValid() && Archive())
+            {
+                try
+                {
+                    _dest.ForEach(p =>
+                    {
+                        if (!p.Exists)
+                            Directory.CreateDirectory(p.GetFolders());
+                        File.Copy(_fullPath, p, true);
+                        FileAttributes newAttrib = Attributes;
+                        if (newAttrib.HasFlag(FileAttributes.Archive))
+                            newAttrib -= FileAttributes.Archive;
+                        File.SetAttributes(_fullPath, newAttrib);
+                    });
+                }
+                catch (Exception e)
+                {
+                    retrun = false;
+                    throw e;
+                }
+
+                return retrun;
+            }
+            else
+                return false;
+        }
+        /// <summary>
+        /// Force la sauvegarde du fichier même s'il n'aurait pas l'indicateur d'archivage.
+        /// </summary>
+        /// <returns>Vrai si la sauvegarde fut faite.</returns>
+        public bool ForcedSync()
+        {
+            bool retrun = true;
+
+            if (IsValid())
+            {
+                try
+                {
+                    _dest.ForEach(p =>
+                    {
+                        if (!p.Exists)
+                            Directory.CreateDirectory(p.GetFolders());
+                        File.Copy(_fullPath, p, true);
+                        FileAttributes newAttrib = Attributes;
+                        if (newAttrib.HasFlag(FileAttributes.Archive))
+                            newAttrib -= FileAttributes.Archive;
+                        File.SetAttributes(_fullPath, newAttrib);
+                    });
+                }
+                catch (Exception e)
+                {
+                    retrun = false;
+                    throw e;
+                }
+
+                return retrun;
+            }
+            else
+                return false;
+        }
+        /// <summary>
+        /// Effectue l'opération inverse de la sauvegarde et copie le fichier sauvegardé le plus récent pour remplacer le fichier sur la station.
+        /// </summary>
+        /// <returns>Vrai si le fichier de la station fut remplacé ou recréé.</returns>
+        public bool RetrieveSync()
+        {
+            PathObj dest = null;
+            DateTime dDest = new DateTime(0);
+
+            _dest.ForEach(p =>
+            {
+                if (p.Exists && File.GetAttributes(p) != FileAttributes.Directory)
+                {
+                    DateTime nd = File.GetLastWriteTime(p);
+                    if (nd > dDest)
+                    {
+                        dDest = nd;
+                        dest = p;
+                    }
+
+                }
+            });
+
+            if (dest == null)
+                return false;
+
+            if (!_fullPath.Exists)
+                Directory.CreateDirectory(_fullPath.GetFolders());
+            File.Copy(dest, _fullPath, true);
+            FileAttributes newAttrib = File.GetAttributes(_fullPath);
+            if (newAttrib.HasFlag(FileAttributes.Archive))
+                newAttrib -= FileAttributes.Archive;
+            File.SetAttributes(_fullPath, newAttrib);
+            return true;
+        }
+        /// <summary>
         /// Liste des codes d'erreur de BUFile
         /// </summary>
         [Flags]
+        [Serializable]
         public enum ErrorCode : short
         {
             /// <summary>
@@ -549,23 +662,23 @@ namespace DataSyncProject
             /// <summary>
             /// La référence au fichier est invalide ou le dossier est manquant.
             /// </summary>
-            FileMissing,
+            FileMissing = 2 ^ 0,
             /// <summary>
             /// La référence est un dossier. Doit être un fichier.
             /// </summary>
-            IsFolder,
+            IsFolder = 2 ^ 1,
             /// <summary>
             /// Pas de dossier de sauvegarde.
             /// </summary>
-            NoDest,
+            NoDest = 2 ^ 2,
             /// <summary>
             /// Pas de dossier de sauvegarde valide.
             /// </summary>
-            NoValidDest,
+            NoValidDest = 2 ^ 3,
             /// <summary>
             /// Le préfixe n'est pas valide dans le contexte actuel.
             /// </summary>
-            PrefixInvalid
+            PrefixInvalid = 2 ^ 4
         }
         /// <summary>
         /// Exception de référence invalide. On a reçu un dossier alors qu'on voulait un fichier.
