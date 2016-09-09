@@ -505,6 +505,10 @@ namespace DataSyncProject
         {
             return IsValid(false);
         }
+        /// <summary>
+        /// Ajoute une destination à la liste après l'avoir vérifiée.
+        /// </summary>
+        /// <param name="dest">Chemin d'accès racine du dossier de sauvegarde.</param>
         public void AddDest(PathObj dest)
         {
             if (!_prefix.Exists)
