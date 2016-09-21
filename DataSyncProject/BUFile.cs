@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using KnownColor = System.Drawing.KnownColor;
+using aColor = System.Drawing.Color;
 
 namespace DataSyncProject
 {
@@ -266,6 +267,7 @@ namespace DataSyncProject
             /// </summary>
             private Color()
             {
+                
             }
         }
         /// <summary>
@@ -439,7 +441,7 @@ namespace DataSyncProject
             {
                 if (!_fullPath.Exists)
                 {
-                    LastErrorCodes &= ErrorCode.FileMissing;
+                    LastErrorCodes |= ErrorCode.FileMissing;
                     retrun = false;
                 }
                 else
@@ -454,7 +456,7 @@ namespace DataSyncProject
 
                     if (Dest.Count <= 0)
                     {
-                        LastErrorCodes &= ErrorCode.NoDest;
+                        LastErrorCodes |= ErrorCode.NoDest;
                         retrun = false;
                     }
                     else
@@ -472,7 +474,7 @@ namespace DataSyncProject
                         });
                         if (!found)
                         {
-                            LastErrorCodes &= ErrorCode.NoValidDest;
+                            LastErrorCodes |= ErrorCode.NoValidDest;
                             retrun = false;
                         }
                     }
@@ -490,7 +492,7 @@ namespace DataSyncProject
                 }
                 if (!_prefix.Exists)
                 {
-                    LastErrorCodes &= ErrorCode.PrefixInvalid;
+                    LastErrorCodes |= ErrorCode.PrefixInvalid;
                     retrun = false;
                 }
             }
@@ -709,5 +711,105 @@ namespace DataSyncProject
             {
             }
         }
+    }
+    /// <summary>
+    /// Contient les fichiers de sauvegarde avec <see cref="BUFile"/>.
+    /// </summary>
+    static class BUFiles
+    {
+        /// <summary>
+        /// Constante du nom de dossier de sauvegarde.
+        /// </summary>
+        public const string SAVEFOLDER = "DataSync\\";
+        /// <summary>
+        /// Liste complète des fichiers à sauvegarder.
+        /// <para>Accès externe avec <see cref="Files"/>.</para>
+        /// </summary>
+        static private List<BUFile> _files = new List<BUFile>();
+        /// <summary>
+        /// Accès externe aux fichiers de sauvegarde.
+        /// </summary>
+        static public List<BUFile> Files
+        {
+            get
+            {
+                return _files;
+            }
+        }
+        /// <summary>
+        /// Ajouter un fichier de sauvegarde.
+        /// </summary>
+        /// <param name="file">Chemin d'accès du fichier à ajouter.</param>
+        static void AddFile(PathObj file)
+        {
+            if (!file.ForceAbsPath())
+                throw new ArgumentException("Le fichier n'existe pas dans le contexte actuel.");
+            if (file.Attributes.HasFlag(FileAttributes.Directory))
+                throw new ArgumentException("Le chemin d'accès fourni n'est pas un fichier.");
+            _files.Add(new BUFile(file));
+        }
+        /// <summary>
+        /// Retire un fichier de la liste.
+        /// </summary>
+        /// <param name="file">Fichier à retirer.</param>
+        static public void RemoveFile(BUFile file)
+        {
+            if (_files.Contains(file))
+                _files.Remove(file);
+        }
+        /// <summary>
+        /// Ajoute une liste de fichier de sauvegarde.
+        /// </summary>
+        /// <param name="files">Tableau des fichiers à ajouter.</param>
+        static public void AddFiles(PathObj[] files)
+        {
+            List<PathObj> addFiles = files.ToList();
+            AddFiles(addFiles);
+        }
+        /// <summary>
+        /// Ajoute une liste de fichier de sauvegarde.
+        /// </summary>
+        /// <param name="files">Tableau des fichiers à ajouter.</param>
+        static public void AddFiles(List<PathObj> files)
+        {
+            if (files.TrueForAll(f => f.ForceAbsPath()))
+            {
+                files.ForEach(f => AddFile(f));
+            }
+        }
+        /// <summary>
+        /// Construit l'arbre de vue des fichiers à sauvegarder.
+        /// </summary>
+        /// <returns>Une collection des noeuds de l'arbre.</returns>
+        /*static public TreeNodeCollection GetTree()
+        {
+            List<TreeNode> l1Nodes = GetFirstLevelNodes();
+        }/**/
+        /// <summary>
+        /// Trouve tous les préfixes des fichiers.
+        /// </summary>
+        /// <returns>Liste de préfixes.</returns>
+        private static List<TreeNode> GetFirstLevelNodes()
+        {
+            List<TreeNode> retrun = new List<TreeNode>();
+            _files.ForEach(f =>
+            {
+                TreeNode n = new TreeNode(f.Prefix);
+                if (!retrun.Contains(n))
+                {
+                    retrun.Add(n);
+                }
+
+                int i = retrun.IndexOf(n);
+
+                if (f.TextColor == BUFile.Color.Error)
+                    retrun[i].ForeColor = aColor.FromKnownColor(f.TextColor);
+                else if (f.TextColor == BUFile.Color.Ok && retrun[i].ForeColor != aColor.FromKnownColor(BUFile.Color.Error))
+                    retrun[i].ForeColor = aColor.FromKnownColor(f.TextColor);
+
+            });
+            return retrun;
+        }
+        //private static List<TreeNode> GetNextLevelNode() { }
     }
 }
